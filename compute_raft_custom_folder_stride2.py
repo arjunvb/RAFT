@@ -27,7 +27,8 @@ def infer_optical_flows_stride2(model, image_dir, output_dir, skip_exists=False)
     with torch.no_grad():
         # images = glob.glob(os.path.join(image_dir, '*.png')) + \
         # glob.glob(os.path.join(image_dir, '*.jpg'))
-        images = glob.glob(image_dir + "*.png") + glob.glob(image_dir + "*.jpg")
+        # images = glob.glob(image_dir + "*.png") + glob.glob(image_dir + "*.jpg")
+        images = image_dir
         images = sorted(images)
         n_images = len(images)
 
