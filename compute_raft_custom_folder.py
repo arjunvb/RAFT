@@ -13,7 +13,13 @@ from .custom_utils import *
 DEVICE = "cuda"
 
 
-def infer_optical_flows(model, image_dir, output_dir, skip_exists=False):
+def infer_optical_flows(
+    model,
+    image_dir,
+    output_dir,
+    skip_exists=False,
+    apply_blur=False,
+):
     flow_save_path = os.path.join(output_dir, "flow_f")
     if not os.path.exists(flow_save_path):
         os.makedirs(flow_save_path)
@@ -53,8 +59,8 @@ def infer_optical_flows(model, image_dir, output_dir, skip_exists=False):
                     continue
 
             # compute forward and backward flow
-            image1 = load_image(imfile1).to(DEVICE)
-            image2 = load_image(imfile2).to(DEVICE)
+            image1 = load_image(imfile1, apply_blur=apply_blur).to(DEVICE)
+            image2 = load_image(imfile2, apply_blur=apply_blur).to(DEVICE)
 
             padder = InputPadder(image1.shape)
             image1, image2 = padder.pad(image1, image2)
@@ -73,7 +79,13 @@ def infer_optical_flows(model, image_dir, output_dir, skip_exists=False):
             flow_write(flow_bk_save_name, flow_backward)
 
 
-def compute_raft_custom_folder(image_dir, output_dir, args=None, skip_exists=False):
+def compute_raft_custom_folder(
+    image_dir,
+    output_dir,
+    args=None,
+    skip_exists=False,
+    apply_blur=False,
+):
     """
     Inputs:
     - image_dir: str - The folder containing input images
@@ -98,7 +110,13 @@ def compute_raft_custom_folder(image_dir, output_dir, args=None, skip_exists=Fal
     model.eval()
 
     # inference
-    infer_optical_flows(model, image_dir, output_dir, skip_exists=skip_exists)
+    infer_optical_flows(
+        model,
+        image_dir,
+        output_dir,
+        skip_exists=skip_exists,
+        apply_blur=apply_blur,
+    )
 
 
 if __name__ == "__main__":
@@ -106,11 +124,15 @@ if __name__ == "__main__":
     parser.add_argument("--image_dir", help="The folder containing input images")
     parser.add_argument("--output_dir", help="Path to the output workspace")
     parser.add_argument(
-        "--model", default="./models/raft-things.pth", help="restore checkpoint"
+        "--model",
+        default="./models/raft-things.pth",
+        help="restore checkpoint",
     )
     parser.add_argument("--small", action="store_true", help="use small model")
     parser.add_argument(
-        "--mixed_precision", action="store_true", help="use mixed precision"
+        "--mixed_precision",
+        action="store_true",
+        help="use mixed precision",
     )
     parser.add_argument(
         "--alternate_corr",
@@ -118,7 +140,14 @@ if __name__ == "__main__":
         help="use efficent correlation implementation",
     )
     parser.add_argument(
-        "--skip_exists", action="store_true", help="whether to skip exists"
+        "--skip_exists",
+        action="store_true",
+        help="whether to skip exists",
+    )
+    parser.add_argument(
+        "--apply_blur",
+        action="store_true",
+        help="apply motion blur",
     )
     args = parser.parse_args()
 

@@ -13,7 +13,13 @@ from .custom_utils import *
 DEVICE = "cuda"
 
 
-def infer_optical_flows_stride2(model, image_dir, output_dir, skip_exists=False):
+def infer_optical_flows_stride2(
+    model,
+    image_dir,
+    output_dir,
+    skip_exists=False,
+    apply_blur=False,
+):
     flow_save_path = os.path.join(output_dir, "flow_f2")
     if not os.path.exists(flow_save_path):
         os.makedirs(flow_save_path)
@@ -53,8 +59,8 @@ def infer_optical_flows_stride2(model, image_dir, output_dir, skip_exists=False)
                     continue
 
             # compute forward and backward flow
-            image1 = load_image(imfile1).to(DEVICE)
-            image2 = load_image(imfile2).to(DEVICE)
+            image1 = load_image(imfile1, apply_blur=apply_blur).to(DEVICE)
+            image2 = load_image(imfile2, apply_blur=apply_blur).to(DEVICE)
 
             padder = InputPadder(image1.shape)
             image1, image2 = padder.pad(image1, image2)
@@ -74,7 +80,11 @@ def infer_optical_flows_stride2(model, image_dir, output_dir, skip_exists=False)
 
 
 def compute_raft_custom_folder_stride2(
-    image_dir, output_dir, args=None, skip_exists=False
+    image_dir,
+    output_dir,
+    args=None,
+    skip_exists=False,
+    apply_blur=False,
 ):
     """
     Inputs:
@@ -100,7 +110,13 @@ def compute_raft_custom_folder_stride2(
     model.eval()
 
     # inference
-    infer_optical_flows_stride2(model, image_dir, output_dir, skip_exists=skip_exists)
+    infer_optical_flows_stride2(
+        model,
+        image_dir,
+        output_dir,
+        skip_exists=skip_exists,
+        apply_blur=apply_blur,
+    )
 
 
 if __name__ == "__main__":
